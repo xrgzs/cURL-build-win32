@@ -468,6 +468,31 @@ EOF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Helper function
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function make_sdk() {
+    rm -rf "${1}" && mkdir -p "${1}" && mkdir "${1}/include" "${1}/lib" "${1}/legal"
+    cp -vrf "${DEPS_DIR}/include/"* "${1}/include/"
+    cp -vf "${DEPS_DIR}/lib/"*.a "${1}/lib/"
+    cp -vf "${DEPS_DIR}/lib/pkgconfig/"*.pc "${1}/lib/" || true
+    cp -vrf "${2}/include/curl" "${1}/include/"
+    cp -vf "${2}/lib/.libs/"libcurl*.a "${1}/lib/"
+    cp -vf "${2}/libcurl.pc" "${1}/lib/" || true
+    unix2dos > "${1}/build_info.txt" << EOF
+cURL SDK for Windows v${MY_VERSION} [$(git -C "${BASE_DIR}" describe --long --dirty)]
+
+This build of cURL was kindly provided by LoRd_MuldeR <mulder2@gmx.de>
+https://github.com/lordmulder/cURL-build-win32
+
+[Platform]
+$(uname -srvmo)
+
+[Compiler]
+$(cc -v 2>&1 | tail -n1)
+EOF
+}
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Helper function
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function copy_doc() {
     unix2dos -n "${2}" "${1}/legal/${3}"
 }
@@ -554,6 +579,17 @@ copy_doc "${OUTDIR_SLIM}" "${SLIM_DIR}/COPYING"     "curl.COPYING.txt"
 copy_doc "${OUTDIR_SLIM}" "${SLIM_DIR}/README"      "curl.README.txt"
 copy_doc "${OUTDIR_SLIM}" "${ZLIB_DIR}/README.md"   "zlib.README.txt"
 make_pkg "${OUTDIR_SLIM}" "slim"
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Output (sdk)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+printf "\n==================== Output (sdk) ====================\n\n"
+readonly OUTDIR_SDK="${WORK_DIR}/_bin/sdk"
+make_sdk "${OUTDIR_SDK}" "${CURL_DIR}"
+copy_doc "${OUTDIR_SDK}" "${CURL_DIR}/COPYING" "curl.COPYING.txt"
+copy_doc "${OUTDIR_SDK}" "${OSSL_DIR}/LICENSE.txt" "openssl.LICENSE.txt"
+copy_doc "${OUTDIR_SDK}" "${ZLIB_DIR}/LICENSE.md" "zlib.LICENSE.txt"
+make_pkg "${OUTDIR_SDK}" "sdk"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Complete

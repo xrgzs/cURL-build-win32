@@ -1,6 +1,6 @@
 # cURL Windows
 
-Build script to create fully-static binaries of [**cURL**](https://curl.se/) for Windows.
+Build script to create fully-static binaries of [**cURL**](https://curl.se/) for Windows, plus a developer SDK package with libcurl headers and static libraries.
 
 These builds provide full Unicode support as well as support for TLS 1.3, HTTP/2, HTTP/3 (QUIC), SSH-2 and IDN.
 
@@ -50,6 +50,8 @@ Optionally, you can build *only* the 32-Bit or 64-Bit package:
 
 3. Now run the **`./build.sh`** script!
 
+This produces `full` and `slim` cURL binary packages, as well as an additional `sdk` package for development/integration scenarios (e.g. Visual Studio projects).
+
 ## MSYS2 MinGW-w64 Warning
 
 Recently, I noticed that my cURL binaries would crash with an “illegal instruction” (0xC000001D) exception, at seemingly random places, on one of my test machines. As it turned out, the offending instruction was an SSE instruction. This **should** be impossible, because I compile cURL and *all* of the required dependencies strictly with the [`-march=i586`](https://gcc.gnu.org/onlinedocs/gcc-15.1.0/gcc/x86-Options.html#x86-Options-1) option &ndash; which instructs the compiler to generate code that runs on the original Intel Pentium CPU, or any newer processor. Certainly, this means that the compiler **must not** generate any SSE instructions, or instructions from an even newer instruction set extension! So, what the heck was going on here?
@@ -86,4 +88,3 @@ cURL has been created by Daniel Stenberg, daniel@haxx.se, and many contributors.
 
 For details, see:  
 https://curl.se/docs/copyright.html
-
