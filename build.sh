@@ -426,7 +426,7 @@ popd
 printf "\n==================== cURL (dll) ====================\n\n"
 readonly CURL_DLL_DIR="${WORK_DIR}/curl.dll"
 init_curl "${CURL_DLL_DIR}"
-CFLAGS="-march=${MY_MARCH} -mtune=${MY_MTUNE} -O2 -I${DEPS_DIR}/include" CPPFLAGS="-DNDEBUG -D_WIN32_WINNT=0x0501 -DNGHTTP2_STATICLIB -DNGHTTP3_STATICLIB -DNGTCP2_STATICLIB -DUNICODE -D_UNICODE" LDFLAGS="-Wl,--trace -Wl,--gc-sections -no-pthread -L${DEPS_DIR}/lib" LIBS="-liconv -lcrypt32 -lwinmm -lbrotlicommon" PKG_CONFIG_PATH="${DEPS_DIR}/lib/pkgconfig" ./configure --disable-static --enable-shared --enable-windows-unicode --disable-openssl-auto-load-config --enable-ca-search-safe --enable-sspi --with-zlib --with-openssl --with-libidn2 --without-ca-bundle --with-zstd --with-brotli --with-libssh2 --with-libgsasl="${DEPS_DIR}" --with-nghttp2="${DEPS_DIR}" --with-ngtcp2="${DEPS_DIR}" --with-nghttp3="${DEPS_DIR}"
+CFLAGS="-march=${MY_MARCH} -mtune=${MY_MTUNE} -O2 -I${DEPS_DIR}/include" CPPFLAGS="-DNDEBUG -D_WIN32_WINNT=0x0501 -DNGHTTP2_STATICLIB -DNGHTTP3_STATICLIB -DNGTCP2_STATICLIB -DUNICODE -D_UNICODE" LDFLAGS="-Wl,--trace -Wl,--gc-sections -no-pthread -L${DEPS_DIR}/lib" LIBS="-liconv -lcrypt32 -lwinmm -lbrotlicommon" PKG_CONFIG_PATH="${DEPS_DIR}/lib/pkgconfig" ./configure --disable-static --enable-shared --disable-curl --enable-windows-unicode --disable-openssl-auto-load-config --enable-ca-search-safe --enable-sspi --with-zlib --with-openssl --with-libidn2 --without-ca-bundle --with-zstd --with-brotli --with-libssh2 --with-libgsasl="${DEPS_DIR}" --with-nghttp2="${DEPS_DIR}" --with-ngtcp2="${DEPS_DIR}" --with-nghttp3="${DEPS_DIR}"
 sed -i 's|#define HAVE_IF_NAMETOINDEX 1|/* #undef HAVE_IF_NAMETOINDEX */|g' lib/curl_config.h
 make V=1
 popd
