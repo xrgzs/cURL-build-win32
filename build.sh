@@ -421,6 +421,17 @@ make V=1
 popd
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# cURL (dll)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+printf "\n==================== cURL (dll) ====================\n\n"
+readonly CURL_DLL_DIR="${WORK_DIR}/curl.dll"
+init_curl "${CURL_DLL_DIR}"
+CFLAGS="-march=${MY_MARCH} -mtune=${MY_MTUNE} -O2 -I${DEPS_DIR}/include" CPPFLAGS="-DNDEBUG -D_WIN32_WINNT=0x0501 -DNGHTTP2_STATICLIB -DNGHTTP3_STATICLIB -DNGTCP2_STATICLIB -DUNICODE -D_UNICODE" LDFLAGS="-Wl,--trace -Wl,--gc-sections -no-pthread -L${DEPS_DIR}/lib" LIBS="-liconv -lcrypt32 -lwinmm -lbrotlicommon" PKG_CONFIG_PATH="${DEPS_DIR}/lib/pkgconfig" ./configure --disable-static --enable-shared --disable-curl --enable-windows-unicode --disable-openssl-auto-load-config --enable-ca-search-safe --enable-sspi --with-zlib --with-openssl --with-libidn2 --without-ca-bundle --with-zstd --with-brotli --with-libssh2 --with-libgsasl="${DEPS_DIR}" --with-nghttp2="${DEPS_DIR}" --with-ngtcp2="${DEPS_DIR}" --with-nghttp3="${DEPS_DIR}"
+sed -i 's|#define HAVE_IF_NAMETOINDEX 1|/* #undef HAVE_IF_NAMETOINDEX */|g' lib/curl_config.h
+make V=1
+popd
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # cURL (slim)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 printf "\n==================== cURL (slim) ====================\n\n"
@@ -476,6 +487,8 @@ function make_sdk() {
     cp -vrf "${2}/include/curl" "${1}/include/"
     cp -vf "${2}/lib/.libs/"libcurl*.a "${1}/lib/"
     cp -vf "${2}/libcurl.pc" "${1}/lib/" || true
+    cp -vf "${3}/lib/.libs/libcurl-4.dll" "${1}/"
+    cp -vf "${3}/lib/.libs/libcurl.dll.a" "${1}/lib/"
     unix2dos > "${1}/build_info.txt" << EOF
 cURL SDK for Windows v${MY_VERSION} [$(git -C "${BASE_DIR}" describe --long --dirty)]
 
@@ -516,6 +529,7 @@ function make_pkg() {
 printf "\n==================== Output (full) ====================\n\n"
 readonly OUTDIR_FULL="${WORK_DIR}/_bin/full"
 make_out "${OUTDIR_FULL}" "${CURL_DIR}" "full"
+install -v --strip "${CURL_DLL_DIR}/lib/.libs/libcurl-4.dll" "${OUTDIR_FULL}/libcurl-4.dll"
 copy_doc "${OUTDIR_FULL}" "${BROT_DIR}/LICENSE"     "brotli.LICENSE.txt"
 copy_doc "${OUTDIR_FULL}" "${BROT_DIR}/README.md"   "brotli.README.md"
 copy_doc "${OUTDIR_FULL}" "${CURL_DIR}/CHANGES.md"  "curl.CHANGES.txt"
@@ -585,7 +599,7 @@ make_pkg "${OUTDIR_SLIM}" "slim"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 printf "\n==================== Output (sdk) ====================\n\n"
 readonly OUTDIR_SDK="${WORK_DIR}/_bin/sdk"
-make_sdk "${OUTDIR_SDK}" "${CURL_DIR}"
+make_sdk "${OUTDIR_SDK}" "${CURL_DIR}" "${CURL_DLL_DIR}"
 copy_doc "${OUTDIR_SDK}" "${CURL_DIR}/COPYING" "curl.COPYING.txt"
 copy_doc "${OUTDIR_SDK}" "${OSSL_DIR}/LICENSE.txt" "openssl.LICENSE.txt"
 copy_doc "${OUTDIR_SDK}" "${ZLIB_DIR}/LICENSE.md" "zlib.LICENSE.txt"
